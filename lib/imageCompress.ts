@@ -22,7 +22,11 @@ export function compressImage(
         canvas.width = img.naturalWidth;
         canvas.height = img.naturalHeight;
 
-        const ctx = canvas.getContext("2d")!;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("Canvas 2D context를 가져올 수 없습니다."));
+          return;
+        }
 
         // PNG → JPEG 변환 시 투명 배경 흰색 처리
         const isPng = file.type === "image/png";
@@ -38,7 +42,7 @@ export function compressImage(
         canvas.toBlob(
           (blob) => {
             if (!blob) {
-              reject(new Error("압축 실패"));
+              reject(new Error("이미지 압축 실패: 손상된 파일이거나 지원하지 않는 형식입니다."));
               return;
             }
             onProgress?.(100);

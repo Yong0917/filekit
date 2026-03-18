@@ -1,74 +1,89 @@
 "use client";
 
-import { useState } from "react";
 import DropZone from "@/components/DropZone";
-import SizeDisplay from "@/components/SizeDisplay";
 import ProgressBar from "@/components/ProgressBar";
+import ResultCard from "@/components/ResultCard";
 import FileThumb from "@/components/FileThumb";
+import { useFileProcessor } from "@/hooks/useFileProcessor";
 import { compressPdf } from "@/lib/pdfCompress";
-import { downloadBlob } from "@/lib/utils";
+import { downloadBlob, classifyPdfError, getPdfErrorMessage } from "@/lib/utils";
 
 interface CompressResult {
   blob: Blob;
   originalSize: number;
   compressedSize: number;
   name: string;
+  file: File;
 }
 
 export default function PdfCompress() {
-  const [files, setFiles] = useState<File[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [results, setResults] = useState<CompressResult[]>([]);
-  const [error, setError] = useState("");
+  const {
+    files,
+    addFiles,
+    clearFiles,
+    loading,
+    progress,
+    currentIndex,
+    results,
+    error,
+    processFiles,
+  } = useFileProcessor<CompressResult>({ maxSizeMB: 200 });
 
   async function handleCompress() {
-    if (files.length === 0) return;
-    setLoading(true);
-    setResults([]);
-    setError("");
-    setProgress(0);
-
-    try {
-      const out: CompressResult[] = [];
-      for (let i = 0; i < files.length; i++) {
-        setCurrentIndex(i + 1);
-        setProgress(Math.round((i / files.length) * 100));
-        const res = await compressPdf(files[i]);
-        out.push({ ...res, name: files[i].name });
-      }
-      setProgress(100);
-      setResults(out);
-    } catch (e) {
-      setError("PDF 처리 중 오류가 발생했습니다. 암호화된 PDF는 지원하지 않습니다.");
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
+    await processFiles(
+      async (file) => {
+        let res;
+        try {
+          res = await compressPdf(file);
+        } catch (e) {
+          const type = classifyPdfError(e);
+          throw new Error(`"${file.name}": ${getPdfErrorMessage(type)}`);
+        }
+        return { ...res, name: file.name, file };
+      },
+      { parallel: true }
+    );
   }
 
   return (
     <div className="space-y-5">
       <DropZone
-        onFiles={setFiles}
+        onFiles={addFiles}
         accept={{ "application/pdf": [".pdf"] }}
         multiple
         label="PDF 파일을 업로드"
-        subLabel="메타데이터 제거 및 구조 최적화로 용량 축소"
+        subLabel="메타데이터 제거 및 구조 최적화로 용량 축소 · 최대 200MB"
       />
 
       {/* 파일 목록 */}
       {files.length > 0 && (
         <div className="space-y-1.5">
-          <p className="text-xs text-gray-500 dark:text-gray-400">{files.length}개 파일 선택됨</p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {files.length}개 파일 선택됨
+            </p>
+            <button
+              onClick={clearFiles}
+              className="cursor-pointer text-xs text-red-500 hover:underline"
+              aria-label="파일 전체 제거"
+            >
+              전체 제거
+            </button>
+          </div>
           <div className="space-y-1.5 max-h-48 overflow-y-auto">
             {files.map((file, i) => (
-              <div key={i} className="flex items-center gap-2.5 p-2 rounded-lg bg-gray-50 dark:bg-gray-800">
+              <div
+                key={i}
+                className="flex items-center gap-2.5 p-2 rounded-lg bg-gray-50 dark:bg-gray-800"
+              >
                 <FileThumb file={file} size={40} />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-700 dark:text-gray-300 truncate">{file.name}</p>
-                  <p className="text-xs text-gray-400">{(file.size / 1024).toFixed(0)} KB</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 truncate">
+                    {file.name}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    {(file.size / 1024).toFixed(0)} KB
+                  </p>
                 </div>
               </div>
             ))}
@@ -89,7 +104,9 @@ export default function PdfCompress() {
       )}
 
       {error && (
-        <p className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">{error}</p>
+        <p className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg whitespace-pre-line">
+          {error}
+        </p>
       )}
 
       <button
@@ -104,24 +121,17 @@ export default function PdfCompress() {
         <div className="space-y-3">
           <h3 className="font-medium text-gray-800 dark:text-gray-200">압축 결과</h3>
           {results.map((item, i) => (
-            <div key={i} className="border border-gray-200 dark:border-gray-700 rounded-lg p-3 space-y-2">
-              <div className="flex items-center gap-2.5">
-                <FileThumb file={files[i]} size={36} />
-                <span className="flex-1 text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
-                  {item.name}
-                </span>
-                <button
-                  onClick={() => {
-                    const base = item.name.replace(/\.pdf$/i, "");
-                    downloadBlob(item.blob, `${base}_compressed.pdf`);
-                  }}
-                  className="cursor-pointer text-sm px-3 py-1 rounded-md bg-green-600 text-white hover:bg-green-700 transition-colors flex-shrink-0"
-                >
-                  ⬇ 다운로드
-                </button>
-              </div>
-              <SizeDisplay originalSize={item.originalSize} newSize={item.compressedSize} />
-            </div>
+            <ResultCard
+              key={i}
+              file={item.file}
+              name={item.name}
+              originalSize={item.originalSize}
+              resultSize={item.compressedSize}
+              onDownload={() => {
+                const base = item.name.replace(/\.pdf$/i, "");
+                downloadBlob(item.blob, `${base}_compressed.pdf`);
+              }}
+            />
           ))}
         </div>
       )}
