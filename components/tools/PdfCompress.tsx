@@ -1,11 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import DropZone from "@/components/DropZone";
 import ProgressBar from "@/components/ProgressBar";
 import ResultCard from "@/components/ResultCard";
 import FileThumb from "@/components/FileThumb";
 import { useFileProcessor } from "@/hooks/useFileProcessor";
-import { compressPdf } from "@/lib/pdfCompress";
+import { compressPdf, CompressQuality } from "@/lib/pdfCompress";
 import { downloadBlob, classifyPdfError, getPdfErrorMessage } from "@/lib/utils";
 
 interface CompressResult {
@@ -16,7 +17,16 @@ interface CompressResult {
   file: File;
 }
 
+const QUALITY_OPTIONS: { value: CompressQuality; label: string; desc: string }[] = [
+  { value: "low", label: "강한 압축", desc: "최소 크기, 화질 손실" },
+  { value: "medium", label: "균형", desc: "크기/화질 균형" },
+  { value: "high", label: "고화질", desc: "높은 화질 유지" },
+];
+
 export default function PdfCompress() {
+  const [quality, setQuality] = useState<CompressQuality>("medium");
+  const [pageProgress, setPageProgress] = useState<{ page: number; total: number } | null>(null);
+
   const {
     files,
     addFiles,
@@ -30,19 +40,23 @@ export default function PdfCompress() {
   } = useFileProcessor<CompressResult>({ maxSizeMB: 200 });
 
   async function handleCompress() {
+    setPageProgress(null);
     await processFiles(
       async (file) => {
         let res;
         try {
-          res = await compressPdf(file);
+          res = await compressPdf(file, quality, (page, total) => {
+            setPageProgress({ page, total });
+          });
         } catch (e) {
           const type = classifyPdfError(e);
           throw new Error(`"${file.name}": ${getPdfErrorMessage(type)}`);
         }
         return { ...res, name: file.name, file };
       },
-      { parallel: true }
+      { parallel: false } // 페이지 렌더링은 순차 처리
     );
+    setPageProgress(null);
   }
 
   return (
@@ -52,7 +66,7 @@ export default function PdfCompress() {
         accept={{ "application/pdf": [".pdf"] }}
         multiple
         label="PDF 파일을 업로드"
-        subLabel="메타데이터 제거 및 구조 최적화로 용량 축소 · 최대 200MB"
+        subLabel="각 페이지를 이미지로 재압축하여 용량 대폭 감소 · 최대 200MB"
       />
 
       {/* 파일 목록 */}
@@ -99,6 +113,35 @@ export default function PdfCompress() {
         </div>
       )}
 
+      {/* 품질 선택 */}
+      <div className="space-y-1.5">
+        <p className="text-[12px] font-medium" style={{ color: "var(--muted)" }}>
+          압축 품질
+        </p>
+        <div className="grid grid-cols-3 gap-2">
+          {QUALITY_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => setQuality(opt.value)}
+              className="py-2 px-3 rounded-lg text-left transition-all duration-100 cursor-pointer"
+              style={{
+                background: quality === opt.value ? "var(--accent)" : "var(--surface)",
+                border: `1px solid ${quality === opt.value ? "var(--accent)" : "var(--border)"}`,
+                color: quality === opt.value ? "#fff" : "var(--fg-2)",
+              }}
+            >
+              <div className="text-[12px] font-medium">{opt.label}</div>
+              <div
+                className="text-[11px] mt-0.5"
+                style={{ color: quality === opt.value ? "rgba(255,255,255,0.75)" : "var(--muted)" }}
+              >
+                {opt.desc}
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* 안내 메시지 */}
       <div
         className="p-3 rounded-lg text-[12px] leading-relaxed"
@@ -108,21 +151,38 @@ export default function PdfCompress() {
           color: "#92400E",
         }}
       >
-        브라우저 기반 PDF 압축은 메타데이터 제거 및 구조 최적화를 수행합니다.
-        이미지가 많은 PDF는 압축률이 낮을 수 있습니다.
+        각 페이지를 이미지로 변환하여 압축합니다. 텍스트 선택·복사 기능은 제거되며,
+        이미지 위주의 PDF에서 가장 효과적입니다.
       </div>
 
       {loading && (
-        <ProgressBar
-          current={progress}
-          label={`${currentIndex} / ${files.length} 처리 중...`}
-        />
+        <div className="space-y-1">
+          <ProgressBar
+            current={progress}
+            label={
+              files.length > 1
+                ? `${currentIndex} / ${files.length} 파일 처리 중...`
+                : pageProgress
+                ? `페이지 ${pageProgress.page} / ${pageProgress.total} 처리 중...`
+                : "처리 중..."
+            }
+          />
+          {pageProgress && files.length <= 1 && (
+            <p className="text-[11px] text-right" style={{ color: "var(--muted)" }}>
+              {pageProgress.page} / {pageProgress.total} 페이지
+            </p>
+          )}
+        </div>
       )}
 
       {error && (
         <p
           className="text-[13px] p-3 rounded-lg whitespace-pre-line"
-          style={{ color: "var(--danger)", background: "var(--danger-bg)", border: "1px solid rgba(220,38,38,0.2)" }}
+          style={{
+            color: "var(--danger)",
+            background: "var(--danger-bg)",
+            border: "1px solid rgba(220,38,38,0.2)",
+          }}
         >
           {error}
         </p>
