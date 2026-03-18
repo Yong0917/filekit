@@ -1,0 +1,26 @@
+<!-- 2: 딥 블루 그라디언트 배경 + 흰 파일 2장 + 흰 화살표 (Linear/Notion 느낌) -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1E40AF"/>
+      <stop offset="100%" stop-color="#1E3A8A"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="114" fill="url(#bg)"/>
+
+  <!-- 왼쪽 파일 (반투명 흰색) -->
+  <rect x="56" y="148" width="156" height="196" rx="20" fill="white" opacity="0.25"/>
+  <path d="M178 148 L212 182 L178 182 Z" fill="white" opacity="0.4"/>
+  <rect x="80" y="268" width="108" height="10" rx="5" fill="white" opacity="0.3"/>
+  <rect x="80" y="286" width="76" height="10" rx="5" fill="white" opacity="0.2"/>
+
+  <!-- 오른쪽 파일 (흰색 solid) -->
+  <rect x="300" y="168" width="156" height="196" rx="20" fill="white"/>
+  <path d="M422 168 L456 202 L422 202 Z" fill="#DBEAFE"/>
+  <rect x="324" y="288" width="108" height="10" rx="5" fill="#BFDBFE"/>
+  <rect x="324" y="306" width="76" height="10" rx="5" fill="#BFDBFE"/>
+
+  <!-- 화살표 -->
+  <rect x="224" y="248" width="64" height="18" rx="9" fill="white"/>
+  <path d="M268 224 L298 257 L268 290 Z" fill="white"/>
+</svg>

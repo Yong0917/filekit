@@ -1,0 +1,19 @@
+<!-- 1: 흰 배경 + 파란 파일 → 파일 + 굵은 화살표 (Apple Files 앱 느낌) -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="114" fill="#ffffff"/>
+
+  <!-- 왼쪽 파일 -->
+  <rect x="52" y="136" width="164" height="208" rx="22" fill="#E8F0FE"/>
+  <path d="M180 136 L216 172 L216 158 Q216 136 194 136 Z" fill="#C5D8FC"/>
+  <path d="M180 136 L180 172 L216 172" fill="none" stroke="#C5D8FC" stroke-width="0"/>
+  <!-- 파일 폴드 (귀퉁이 접힘) -->
+  <path d="M180 136 L216 172 L180 172 Z" fill="#BDD0FB"/>
+
+  <!-- 오른쪽 파일 (파란색, 결과) -->
+  <rect x="296" y="168" width="164" height="208" rx="22" fill="#1A73E8"/>
+  <path d="M424 168 L460 204 L424 204 Z" fill="#1557B0"/>
+
+  <!-- 중앙 굵은 화살표 -->
+  <rect x="228" y="242" width="56" height="20" rx="10" fill="#1A73E8"/>
+  <path d="M266 218 L300 252 L266 286 Z" fill="#1A73E8"/>
+</svg>

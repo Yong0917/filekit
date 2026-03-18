@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 
 // 클라이언트 전용 라이브러리이므로 dynamic import
@@ -22,6 +22,15 @@ type TabId = (typeof TABS)[number]["id"];
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<TabId>("image-compress");
+
+  // URL ?tab= 파라미터로 초기 탭 설정 (PWA 바로가기 지원)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get("tab") as TabId | null;
+    if (tab && TABS.some((t) => t.id === tab)) {
+      setActiveTab(tab);
+    }
+  }, []);
 
   const ActiveComponent = TABS.find((t) => t.id === activeTab)!.component;
 

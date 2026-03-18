@@ -1,0 +1,26 @@
+<!-- 4: 흰 배경 + 한 파일 중심 + 오른쪽 위 작은 스파크 (Craft/Things 느낌) -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="fileGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#2563EB"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="114" fill="#ffffff"/>
+
+  <!-- 메인 파일 -->
+  <rect x="96" y="88" width="248" height="312" rx="28" fill="url(#fileGrad)"/>
+  <!-- 폴드 -->
+  <path d="M308 88 L344 124 L308 124 Z" fill="#1D4ED8"/>
+
+  <!-- 내부 라인들 (문서 내용) -->
+  <rect x="128" y="192" width="184" height="14" rx="7" fill="white" opacity="0.3"/>
+  <rect x="128" y="218" width="140" height="14" rx="7" fill="white" opacity="0.2"/>
+  <rect x="128" y="244" width="160" height="14" rx="7" fill="white" opacity="0.2"/>
+  <rect x="128" y="270" width="112" height="14" rx="7" fill="white" opacity="0.2"/>
+
+  <!-- 오른쪽 하단 변환 뱃지 -->
+  <circle cx="364" cy="364" r="72" fill="#0F172A"/>
+  <!-- 번개 -->
+  <path d="M376 320 L344 368 L364 368 L352 408 L392 356 L368 356 Z" fill="#FACC15"/>
+</svg>

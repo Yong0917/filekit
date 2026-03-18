@@ -1,0 +1,39 @@
+{
+  "name": "FileKit – 무료 파일 변환 도구",
+  "short_name": "FileKit",
+  "description": "이미지 압축, PDF 변환, 이미지 포맷 변환, PDF 병합을 무료로. 파일이 서버에 업로드되지 않습니다.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
+  "lang": "ko",
+  "categories": ["utilities", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "이미지 압축",
+      "url": "/?tab=image-compress",
+      "description": "이미지를 빠르게 압축합니다"
+    },
+    {
+      "name": "PDF 병합",
+      "url": "/?tab=pdf-merge",
+      "description": "여러 PDF를 하나로 합칩니다"
+    }
+  ]
+}
