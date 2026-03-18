@@ -20,19 +20,24 @@ const TABS = [
 
 type TabId = (typeof TABS)[number]["id"];
 
+function isTabId(value: string): value is TabId {
+  return TABS.some((t) => t.id === value);
+}
+
 export default function Home() {
   const [activeTab, setActiveTab] = useState<TabId>("image-compress");
 
   // URL ?tab= 파라미터로 초기 탭 설정 (PWA 바로가기 지원)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const tab = params.get("tab") as TabId | null;
-    if (tab && TABS.some((t) => t.id === tab)) {
+    const tab = params.get("tab");
+    if (tab && isTabId(tab)) {
       setActiveTab(tab);
     }
   }, []);
 
-  const ActiveComponent = TABS.find((t) => t.id === activeTab)!.component;
+  const activeTabMeta = TABS.find((t) => t.id === activeTab);
+  const ActiveComponent = activeTabMeta?.component ?? TABS[0].component;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
@@ -60,10 +65,14 @@ export default function Home() {
       {/* 탭 네비게이션 */}
       <nav className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-10">
         <div className="max-w-3xl mx-auto px-4">
-          <div className="flex overflow-x-auto">
+          <div role="tablist" aria-label="파일 변환 도구 선택" className="flex overflow-x-auto">
             {TABS.map((tab) => (
               <button
                 key={tab.id}
+                id={`tab-${tab.id}`}
+                role="tab"
+                aria-selected={activeTab === tab.id}
+                aria-controls={`panel-${tab.id}`}
                 onClick={() => setActiveTab(tab.id)}
                 className={`
                   cursor-pointer flex items-center gap-1.5 px-3 py-3.5 text-sm whitespace-nowrap transition-colors border-b-2 flex-shrink-0
@@ -85,18 +94,21 @@ export default function Home() {
 
       {/* 메인 컨텐츠 */}
       <main className="max-w-3xl mx-auto px-4 py-6">
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5 shadow-sm">
+        <div
+          id={`panel-${activeTab}`}
+          role="tabpanel"
+          aria-labelledby={`tab-${activeTab}`}
+          className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5 shadow-sm"
+        >
           {/* 탭 제목 */}
           <div className="mb-5 pb-4 border-b border-gray-100 dark:border-gray-800">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-              {TABS.find((t) => t.id === activeTab)!.icon}{" "}
-              {TABS.find((t) => t.id === activeTab)!.label}
+              {activeTabMeta?.icon} {activeTabMeta?.label}
             </h2>
           </div>
 
           <ActiveComponent />
         </div>
-
       </main>
     </div>
   );

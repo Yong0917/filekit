@@ -16,8 +16,11 @@ export default function FileThumb({ file, size = 48 }: FileThumbProps) {
     if (!isImage) return;
     const objectUrl = URL.createObjectURL(file);
     setUrl(objectUrl);
-    return () => URL.revokeObjectURL(objectUrl);
-  }, [file, isImage]);
+    return () => {
+      URL.revokeObjectURL(objectUrl);
+      setUrl(null); // 이전 URL 참조 제거
+    };
+  }, [file]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (isImage && url) {
     return (
