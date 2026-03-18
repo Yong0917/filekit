@@ -25,6 +25,7 @@ interface ConvertedFile {
 export default function ImageConvert() {
   const [files, setFiles] = useState<File[]>([]);
   const [targetFormat, setTargetFormat] = useState<ImageFormat>("webp");
+  const [quality, setQuality] = useState(85); // 품질 0~100 (PNG는 무손실이라 미사용)
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -40,7 +41,7 @@ export default function ImageConvert() {
     for (let i = 0; i < files.length; i++) {
       setCurrentIndex(i + 1);
       setProgress(Math.round((i / files.length) * 100));
-      const res = await convertImageFormat(files[i], targetFormat, 1);
+      const res = await convertImageFormat(files[i], targetFormat, targetFormat === "png" ? 1 : quality / 100);
       out.push({
         name: files[i].name,
         blob: res.blob,
@@ -108,6 +109,30 @@ export default function ImageConvert() {
           ))}
         </div>
       </div>
+
+      {/* 품질 슬라이더 (PNG는 무손실이라 숨김) */}
+      {targetFormat !== "png" && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-600 dark:text-gray-400">출력 품질</span>
+            <span className="font-semibold text-blue-600 dark:text-blue-400">{quality}%</span>
+          </div>
+          <input
+            type="range"
+            min={10}
+            max={100}
+            step={5}
+            value={quality}
+            onChange={(e) => setQuality(Number(e.target.value))}
+            disabled={loading}
+            className="w-full accent-blue-600"
+          />
+          <div className="flex justify-between text-xs text-gray-400">
+            <span>최대 압축</span>
+            <span>원본 품질</span>
+          </div>
+        </div>
+      )}
 
       {loading && (
         <ProgressBar

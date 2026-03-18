@@ -18,6 +18,7 @@ interface CompressedFile {
 
 export default function ImageCompress() {
   const [files, setFiles] = useState<File[]>([]);
+  const [quality, setQuality] = useState(80); // 품질 0~100
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0); // 전체 진행률 0~100
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -32,7 +33,7 @@ export default function ImageCompress() {
     const out: CompressedFile[] = [];
     for (let i = 0; i < files.length; i++) {
       setCurrentIndex(i + 1);
-      const res = await compressImage(files[i], 1, (p) => {
+      const res = await compressImage(files[i], quality / 100, (p) => {
         // 전체 진행률 = 완료된 파일 비율 + 현재 파일 진행률
         const total = Math.round((i / files.length) * 100 + p / files.length);
         setProgress(total);
@@ -95,6 +96,28 @@ export default function ImageCompress() {
           </div>
         </div>
       )}
+
+      {/* 품질 슬라이더 */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-gray-600 dark:text-gray-400">압축 품질</span>
+          <span className="font-semibold text-blue-600 dark:text-blue-400">{quality}%</span>
+        </div>
+        <input
+          type="range"
+          min={10}
+          max={100}
+          step={5}
+          value={quality}
+          onChange={(e) => setQuality(Number(e.target.value))}
+          disabled={loading}
+          className="w-full accent-blue-600"
+        />
+        <div className="flex justify-between text-xs text-gray-400">
+          <span>최대 압축</span>
+          <span>원본 품질</span>
+        </div>
+      </div>
 
       {/* 진행률 */}
       {loading && (
