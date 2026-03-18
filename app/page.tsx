@@ -1,64 +1,93 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import dynamic from "next/dynamic";
+
+// 클라이언트 전용 라이브러리이므로 dynamic import
+const ImageCompress = dynamic(() => import("@/components/tools/ImageCompress"), { ssr: false });
+const ImageToPdf = dynamic(() => import("@/components/tools/ImageToPdf"), { ssr: false });
+const PdfCompress = dynamic(() => import("@/components/tools/PdfCompress"), { ssr: false });
+const ImageConvert = dynamic(() => import("@/components/tools/ImageConvert"), { ssr: false });
+const PdfMerge = dynamic(() => import("@/components/tools/PdfMerge"), { ssr: false });
+
+const TABS = [
+  { id: "image-compress", label: "이미지 압축", icon: "🗜️", component: ImageCompress },
+  { id: "image-to-pdf", label: "이미지 → PDF", icon: "📄", component: ImageToPdf },
+  { id: "pdf-compress", label: "PDF 압축", icon: "📦", component: PdfCompress },
+  { id: "image-convert", label: "포맷 변환", icon: "🔄", component: ImageConvert },
+  { id: "pdf-merge", label: "PDF 병합", icon: "🔗", component: PdfMerge },
+] as const;
+
+type TabId = (typeof TABS)[number]["id"];
 
 export default function Home() {
+  const [activeTab, setActiveTab] = useState<TabId>("image-compress");
+
+  const ActiveComponent = TABS.find((t) => t.id === activeTab)!.component;
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+      {/* 헤더 */}
+      <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">⚡</span>
+            <div>
+              <h1 className="font-bold text-lg text-gray-900 dark:text-white leading-tight">
+                FileKit
+              </h1>
+              <p className="text-xs text-gray-500 dark:text-gray-400">무료 파일 변환 도구</p>
+            </div>
+          </div>
+          {/* 개인정보 보호 뱃지 */}
+          <div className="flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-2.5 py-1.5 rounded-full border border-green-200 dark:border-green-800">
+            <span>🔒</span>
+            <span className="hidden sm:inline">파일이 서버에 저장되지 않음</span>
+            <span className="sm:hidden">로컬 처리</span>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </header>
+
+      {/* 탭 네비게이션 */}
+      <nav className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-10">
+        <div className="max-w-3xl mx-auto px-4">
+          <div className="flex overflow-x-auto">
+            {TABS.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`
+                  cursor-pointer flex items-center gap-1.5 px-3 py-3.5 text-sm whitespace-nowrap transition-colors border-b-2 flex-shrink-0
+                  ${
+                    activeTab === tab.id
+                      ? "border-blue-500 text-blue-600 dark:text-blue-400 font-medium"
+                      : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                  }
+                `}
+              >
+                <span className="text-base">{tab.icon}</span>
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="sm:hidden text-xs">{tab.label.split(" ")[0]}</span>
+              </button>
+            ))}
+          </div>
         </div>
+      </nav>
+
+      {/* 메인 컨텐츠 */}
+      <main className="max-w-3xl mx-auto px-4 py-6">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5 shadow-sm">
+          {/* 탭 제목 */}
+          <div className="mb-5 pb-4 border-b border-gray-100 dark:border-gray-800">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              {TABS.find((t) => t.id === activeTab)!.icon}{" "}
+              {TABS.find((t) => t.id === activeTab)!.label}
+            </h2>
+          </div>
+
+          <ActiveComponent />
+        </div>
+
       </main>
     </div>
   );
