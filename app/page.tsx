@@ -12,7 +12,7 @@ const PdfMerge      = dynamic(() => import("@/components/tools/PdfMerge"),      
 
 const TABS = [
   { id: "image-compress", label: "이미지 압축",   shortLabel: "압축",    component: ImageCompress },
-  { id: "image-to-pdf",   label: "이미지 → PDF",  shortLabel: "→ PDF",   component: ImageToPdf    },
+  { id: "image-to-pdf",   label: "이미지 → PDF",  shortLabel: "이미지→PDF", component: ImageToPdf    },
   { id: "pdf-compress",   label: "PDF 압축",       shortLabel: "PDF 압축",component: PdfCompress   },
   { id: "image-convert",  label: "포맷 변환",      shortLabel: "변환",    component: ImageConvert  },
   { id: "pdf-merge",      label: "PDF 병합",       shortLabel: "병합",    component: PdfMerge      },
