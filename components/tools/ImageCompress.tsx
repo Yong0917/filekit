@@ -6,6 +6,7 @@ import ProgressBar from "@/components/ProgressBar";
 import ResultCard from "@/components/ResultCard";
 import QualitySlider from "@/components/QualitySlider";
 import FileThumb from "@/components/FileThumb";
+import ImageModal from "@/components/ImageModal";
 import { useFileProcessor } from "@/hooks/useFileProcessor";
 import { compressImage } from "@/lib/imageCompress";
 import { downloadBlob } from "@/lib/utils";
@@ -20,6 +21,7 @@ interface CompressedFile {
 
 export default function ImageCompress() {
   const [quality, setQuality] = useState(80);
+  const [previewFile, setPreviewFile] = useState<File | null>(null);
   const {
     files,
     addFiles,
@@ -57,6 +59,7 @@ export default function ImageCompress() {
 
   return (
     <div className="space-y-5">
+      <ImageModal file={previewFile} onClose={() => setPreviewFile(null)} />
       <DropZone
         onFiles={addFiles}
         accept={{ "image/jpeg": [], "image/png": [], "image/webp": [] }}
@@ -86,7 +89,7 @@ export default function ImageCompress() {
                 key={i}
                 className="flex items-center gap-2.5 p-2 rounded-lg bg-gray-50 dark:bg-gray-800"
               >
-                <FileThumb file={file} size={40} />
+                <FileThumb file={file} size={40} onClick={() => setPreviewFile(file)} />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-gray-700 dark:text-gray-300 truncate">
                     {file.name}
@@ -162,6 +165,7 @@ export default function ImageCompress() {
               originalSize={item.originalSize}
               resultSize={item.compressedSize}
               onDownload={() => handleDownload(item)}
+              onPreview={() => setPreviewFile(item.file)}
             />
           ))}
         </div>

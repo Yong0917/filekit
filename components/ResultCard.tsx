@@ -9,6 +9,7 @@ interface ResultCardProps {
   originalSize: number;
   resultSize: number;
   onDownload: () => void;
+  onPreview?: () => void;
 }
 
 export default function ResultCard({
@@ -17,11 +18,12 @@ export default function ResultCard({
   originalSize,
   resultSize,
   onDownload,
+  onPreview,
 }: ResultCardProps) {
   return (
     <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-3 space-y-2">
       <div className="flex items-center gap-2.5">
-        <FileThumb file={file} size={36} />
+        <FileThumb file={file} size={36} onClick={onPreview} />
         <span className="flex-1 text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
           {name}
         </span>

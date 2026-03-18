@@ -5,9 +5,10 @@ import { useEffect, useState } from "react";
 interface FileThumbProps {
   file: File;
   size?: number; // px
+  onClick?: () => void;
 }
 
-export default function FileThumb({ file, size = 48 }: FileThumbProps) {
+export default function FileThumb({ file, size = 48, onClick }: FileThumbProps) {
   const [url, setUrl] = useState<string | null>(null);
   if (!file) return null;
   const isImage = file.type.startsWith("image/");
@@ -30,7 +31,8 @@ export default function FileThumb({ file, size = 48 }: FileThumbProps) {
         alt={file.name}
         width={size}
         height={size}
-        className="rounded object-cover flex-shrink-0"
+        onClick={onClick}
+        className={`rounded object-cover flex-shrink-0 ${onClick ? "cursor-zoom-in hover:opacity-80 transition-opacity" : ""}`}
         style={{ width: size, height: size }}
       />
     );
