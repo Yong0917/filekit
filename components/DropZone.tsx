@@ -34,29 +34,54 @@ export default function DropZone({
   return (
     <div
       {...getRootProps()}
-      className={`
-        border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200
-        ${isDragActive
-          ? "border-blue-500 bg-blue-50 dark:bg-blue-950/30"
-          : "border-gray-300 dark:border-gray-600 hover:border-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800/50"
-        }
-      `}
+      className="rounded-xl p-8 text-center cursor-pointer transition-all duration-200 outline-none"
+      style={{
+        border: `1.5px dashed ${isDragActive ? "var(--accent)" : "var(--border-strong)"}`,
+        background: isDragActive ? "var(--accent-bg)" : "var(--surface-2)",
+      }}
     >
       <input {...getInputProps()} />
       <div className="flex flex-col items-center gap-3">
+
         {/* 업로드 아이콘 */}
-        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl transition-colors
-          ${isDragActive ? "bg-blue-100 dark:bg-blue-900" : "bg-gray-100 dark:bg-gray-800"}`}>
-          {isDragActive ? "📂" : "📁"}
+        <div
+          className="w-11 h-11 rounded-xl flex items-center justify-center transition-colors duration-200"
+          style={{
+            background: isDragActive ? "var(--accent-bg)" : "var(--surface)",
+            border: "1px solid var(--border)",
+            boxShadow: "var(--shadow-xs)",
+          }}
+        >
+          {isDragActive ? (
+            /* 내려놓기 아이콘 */
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M10 3v10M6 9l4 4 4-4" stroke="var(--accent)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M3 16h14" stroke="var(--accent)" strokeWidth="1.8" strokeLinecap="round"/>
+            </svg>
+          ) : (
+            /* 업로드 아이콘 */
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M10 13V4M6 7l4-4 4 4" stroke="var(--fg-2)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M4 14v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1" stroke="var(--fg-2)" strokeWidth="1.8" strokeLinecap="round"/>
+            </svg>
+          )}
         </div>
-        <div>
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+
+        {/* 텍스트 */}
+        <div className="space-y-1">
+          <p
+            className="text-[13px] font-medium"
+            style={{ color: isDragActive ? "var(--accent)" : "var(--fg-2)" }}
+          >
             {isDragActive ? "여기에 놓으세요!" : label}
           </p>
           {subLabel && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{subLabel}</p>
+            <p className="text-[12px]" style={{ color: "var(--muted)" }}>
+              {subLabel}
+            </p>
           )}
         </div>
+
       </div>
     </div>
   );

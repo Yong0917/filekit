@@ -19,7 +19,7 @@ export default function FileThumb({ file, size = 48, onClick }: FileThumbProps) 
     setUrl(objectUrl);
     return () => {
       URL.revokeObjectURL(objectUrl);
-      setUrl(null); // 이전 URL 참조 제거
+      setUrl(null);
     };
   }, [file]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -32,8 +32,12 @@ export default function FileThumb({ file, size = 48, onClick }: FileThumbProps) 
         width={size}
         height={size}
         onClick={onClick}
-        className={`rounded object-cover flex-shrink-0 ${onClick ? "cursor-zoom-in hover:opacity-80 transition-opacity" : ""}`}
-        style={{ width: size, height: size }}
+        className={`rounded-lg object-cover flex-shrink-0 ${onClick ? "cursor-zoom-in hover:opacity-75 transition-opacity duration-150" : ""}`}
+        style={{
+          width: size,
+          height: size,
+          border: "1px solid var(--border)",
+        }}
       />
     );
   }
@@ -42,8 +46,15 @@ export default function FileThumb({ file, size = 48, onClick }: FileThumbProps) 
   const isPdf = file.type === "application/pdf";
   return (
     <div
-      className="rounded flex items-center justify-center flex-shrink-0 bg-red-50 dark:bg-red-900/20 text-red-500 text-lg font-bold"
-      style={{ width: size, height: size, fontSize: size * 0.4 }}
+      className="rounded-lg flex items-center justify-center flex-shrink-0 font-bold select-none"
+      style={{
+        width: size,
+        height: size,
+        fontSize: size * 0.32,
+        background: isPdf ? "var(--danger-bg)" : "var(--surface-2)",
+        color: isPdf ? "var(--danger)" : "var(--muted)",
+        border: "1px solid var(--border)",
+      }}
     >
       {isPdf ? "PDF" : "📄"}
     </div>

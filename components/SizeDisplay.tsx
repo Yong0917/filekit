@@ -11,23 +11,41 @@ export default function SizeDisplay({ originalSize, newSize, label }: SizeDispla
   const isBigger = newSize > originalSize;
 
   return (
-    <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800 text-sm flex-wrap">
-      {label && <span className="text-gray-500 text-xs">{label}</span>}
-      <span className="text-gray-600 dark:text-gray-300">
-        <span className="font-mono">{formatBytes(originalSize)}</span>
+    <div
+      className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[12px] flex-wrap"
+      style={{ background: "var(--surface-2)", border: "1px solid var(--border)" }}
+    >
+      {label && (
+        <span className="text-[11px]" style={{ color: "var(--muted)" }}>
+          {label}
+        </span>
+      )}
+
+      {/* 원본 크기 */}
+      <span className="font-mono" style={{ color: "var(--fg-2)" }}>
+        {formatBytes(originalSize)}
       </span>
-      <span className="text-gray-400">→</span>
-      <span className="font-mono font-medium text-gray-800 dark:text-gray-100">
+
+      {/* 화살표 */}
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" className="flex-shrink-0">
+        <path d="M3 7h8M8 4l3 3-3 3" stroke="var(--muted)" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+
+      {/* 변환된 크기 */}
+      <span className="font-mono font-medium" style={{ color: "var(--fg)" }}>
         {formatBytes(newSize)}
       </span>
+
+      {/* 감소율 뱃지 */}
       <span
-        className={`ml-auto font-semibold px-2 py-0.5 rounded-full text-xs ${
-          isBigger
-            ? "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400"
-            : "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
-        }`}
+        className="ml-auto text-[11px] font-semibold px-2 py-0.5 rounded-full"
+        style={{
+          color: isBigger ? "#D97706" : "var(--success)",
+          background: isBigger ? "rgba(217,119,6,0.08)" : "var(--success-bg)",
+          border: `1px solid ${isBigger ? "rgba(217,119,6,0.2)" : "var(--success-border)"}`,
+        }}
       >
-        {isBigger ? `+${Math.abs(reduction)}%` : `-${reduction}%`}
+        {isBigger ? `+${Math.abs(reduction)}%` : `−${reduction}%`}
       </span>
     </div>
   );
