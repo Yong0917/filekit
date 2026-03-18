@@ -6,7 +6,7 @@ import ProgressBar from "@/components/ProgressBar";
 import FileListEditor from "@/components/FileListEditor";
 import { useFileProcessor } from "@/hooks/useFileProcessor";
 import { imagesToPdf } from "@/lib/imageToPdf";
-import { downloadBlob } from "@/lib/utils";
+import { downloadBlob, formatBytes } from "@/lib/utils";
 
 interface PdfResult {
   blob: Blob;
@@ -87,15 +87,19 @@ export default function ImageToPdf() {
             border: "1px solid var(--success-border)",
           }}
         >
-          <span
-            className="text-[13px] font-medium flex items-center gap-1.5"
-            style={{ color: "var(--success)" }}
-          >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" style={{ color: "var(--success)", flexShrink: 0 }}>
               <path d="M2.5 7l3 3 6-6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            PDF 변환 완료
-          </span>
+            <div className="min-w-0">
+              <p className="text-[13px] font-medium truncate" style={{ color: "var(--success)" }}>
+                {result.fileName}
+              </p>
+              <p className="text-[11px]" style={{ color: "var(--success)", opacity: 0.7 }}>
+                {formatBytes(result.blob.size)}
+              </p>
+            </div>
+          </div>
           <button
             onClick={() => downloadBlob(result.blob, result.fileName)}
             className="cursor-pointer text-[12px] font-medium px-3 py-1.5 rounded-lg text-white transition-all duration-150 hover:brightness-90 active:scale-95"

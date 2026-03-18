@@ -5,25 +5,45 @@ export interface ImageToPdfResult {
   pageCount: number;
 }
 
-// 이미지 파일을 Data URL로 변환
-function fileToDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
+// 최대 장변 픽셀 (A4 200dpi 기준, 이 이상은 축소)
+const MAX_DIMENSION = 2000;
 
-// 이미지의 실제 크기 반환
-function getImageDimensions(
-  dataUrl: string
-): Promise<{ width: number; height: number }> {
+// 이미지를 JPEG로 재인코딩 + 해상도 제한
+function optimizeImage(
+  file: File,
+  quality = 0.85
+): Promise<{ dataUrl: string; width: number; height: number }> {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
-    img.onerror = reject;
-    img.src = dataUrl;
+    const url = URL.createObjectURL(file);
+
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+
+      let w = img.naturalWidth;
+      let h = img.naturalHeight;
+
+      // 최대 해상도 제한 (비율 유지)
+      if (w > MAX_DIMENSION || h > MAX_DIMENSION) {
+        const scale = MAX_DIMENSION / Math.max(w, h);
+        w = Math.round(w * scale);
+        h = Math.round(h * scale);
+      }
+
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext("2d")!.drawImage(img, 0, 0, w, h);
+
+      resolve({ dataUrl: canvas.toDataURL("image/jpeg", quality), width: w, height: h });
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error(`이미지 로딩 실패: "${file.name}"`));
+    };
+
+    img.src = url;
   });
 }
 
@@ -39,22 +59,16 @@ export async function imagesToPdf(
 
   for (let i = 0; i < files.length; i++) {
     let dataUrl: string;
-    try {
-      dataUrl = await fileToDataUrl(files[i]);
-    } catch {
-      throw new Error(
-        `이미지 로딩 실패: "${files[i].name}"이(가) 손상되었거나 지원하지 않는 형식입니다.`
-      );
-    }
-
     let width: number, height: number;
+
     try {
-      ({ width, height } = await getImageDimensions(dataUrl));
-    } catch {
-      throw new Error(`이미지 크기 읽기 실패: "${files[i].name}"`);
+      ({ dataUrl, width, height } = await optimizeImage(files[i]));
+    } catch (e) {
+      throw e instanceof Error
+        ? e
+        : new Error(`이미지 처리 실패: "${files[i].name}"`);
     }
 
-    // 가로/세로 비율에 맞춰 PDF 페이지 방향 결정
     const orientation = width >= height ? "landscape" : "portrait";
 
     if (i === 0) {
@@ -68,7 +82,7 @@ export async function imagesToPdf(
       pdf!.addPage([width, height], orientation);
     }
 
-    pdf!.addImage(dataUrl, "JPEG", 0, 0, width, height);
+    pdf!.addImage(dataUrl, "JPEG", 0, 0, width, height, undefined, "MEDIUM");
     onProgress?.(Math.round(((i + 1) / files.length) * 100));
   }
 
