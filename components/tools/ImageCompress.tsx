@@ -60,6 +60,7 @@ export default function ImageCompress() {
   return (
     <div className="space-y-5">
       <ImageModal file={previewFile} onClose={() => setPreviewFile(null)} />
+
       <DropZone
         onFiles={addFiles}
         accept={{ "image/jpeg": [], "image/png": [], "image/webp": [] }}
@@ -68,42 +69,53 @@ export default function ImageCompress() {
         subLabel="여러 파일 동시 처리 가능 · 최대 100MB"
       />
 
-      {/* 파일 목록 + 썸네일 */}
+      {/* 파일 목록 */}
       {files.length > 0 && (
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-[12px]" style={{ color: "var(--muted)" }}>
               {files.length}개 파일 선택됨
             </p>
             <button
               onClick={clearFiles}
-              className="cursor-pointer text-xs text-red-500 hover:underline"
+              className="cursor-pointer text-[12px] hover:underline"
+              style={{ color: "var(--danger)" }}
               aria-label="파일 전체 제거"
             >
               전체 제거
             </button>
           </div>
-          <div className="space-y-1.5 max-h-48 overflow-y-auto">
+          <div
+            className="space-y-px rounded-xl overflow-hidden max-h-48 overflow-y-auto"
+            style={{ border: "1px solid var(--border)" }}
+          >
             {files.map((file, i) => (
               <div
                 key={i}
-                className="flex items-center gap-2.5 p-2 rounded-lg bg-gray-50 dark:bg-gray-800"
+                className="flex items-center gap-2.5 px-2.5 py-2"
+                style={{
+                  background: "var(--surface)",
+                  borderTop: i > 0 ? "1px solid var(--border)" : "none",
+                }}
               >
-                <FileThumb file={file} size={40} onClick={() => setPreviewFile(file)} />
+                <FileThumb file={file} size={36} onClick={() => setPreviewFile(file)} />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-700 dark:text-gray-300 truncate">
+                  <p className="text-[13px] truncate" style={{ color: "var(--fg-2)" }}>
                     {file.name}
                   </p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-[11px]" style={{ color: "var(--muted)" }}>
                     {(file.size / 1024).toFixed(0)} KB
                   </p>
                 </div>
                 <button
                   onClick={() => removeFile(i)}
-                  className="cursor-pointer p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded text-red-400 flex-shrink-0"
+                  className="cursor-pointer w-6 h-6 flex items-center justify-center rounded flex-shrink-0 transition-colors duration-100"
+                  style={{ color: "var(--muted)" }}
+                  onMouseEnter={e => { e.currentTarget.style.background = "var(--danger-bg)"; e.currentTarget.style.color = "var(--danger)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--muted)"; }}
                   aria-label={`${file.name} 제거`}
                 >
-                  ✕
+                  <svg width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M1 1l7 7M8 1L1 8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>
                 </button>
               </div>
             ))}
@@ -119,7 +131,6 @@ export default function ImageCompress() {
         label="압축 품질"
       />
 
-      {/* 진행률 */}
       {loading && (
         <ProgressBar
           current={progress}
@@ -128,7 +139,10 @@ export default function ImageCompress() {
       )}
 
       {error && (
-        <p className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg whitespace-pre-line">
+        <p
+          className="text-[13px] p-3 rounded-lg whitespace-pre-line"
+          style={{ color: "var(--danger)", background: "var(--danger-bg)", border: "1px solid rgba(220,38,38,0.2)" }}
+        >
           {error}
         </p>
       )}
@@ -136,7 +150,11 @@ export default function ImageCompress() {
       <button
         onClick={handleCompress}
         disabled={files.length === 0 || loading}
-        className="w-full py-3 px-4 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="w-full py-[11px] px-4 rounded-xl text-[14px] font-medium text-white transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-90 active:scale-[0.99] cursor-pointer"
+        style={{
+          background: "var(--accent)",
+          boxShadow: "0 1px 3px rgba(37,99,235,0.25), inset 0 1px 0 rgba(255,255,255,0.1)",
+        }}
       >
         {loading ? "압축 중..." : "이미지 압축"}
       </button>
@@ -144,13 +162,14 @@ export default function ImageCompress() {
       {results.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="font-medium text-gray-800 dark:text-gray-200">
+            <h3 className="text-[14px] font-semibold" style={{ color: "var(--fg)" }}>
               압축 결과
             </h3>
             {results.length > 1 && (
               <button
                 onClick={() => results.forEach((item) => handleDownload(item))}
-                className="cursor-pointer text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                className="cursor-pointer text-[12px] font-medium hover:underline"
+                style={{ color: "var(--accent)" }}
                 aria-label="압축 결과 전체 다운로드"
               >
                 전체 다운로드

@@ -57,31 +57,39 @@ export default function PdfCompress() {
 
       {/* 파일 목록 */}
       {files.length > 0 && (
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-[12px]" style={{ color: "var(--muted)" }}>
               {files.length}개 파일 선택됨
             </p>
             <button
               onClick={clearFiles}
-              className="cursor-pointer text-xs text-red-500 hover:underline"
+              className="cursor-pointer text-[12px] hover:underline"
+              style={{ color: "var(--danger)" }}
               aria-label="파일 전체 제거"
             >
               전체 제거
             </button>
           </div>
-          <div className="space-y-1.5 max-h-48 overflow-y-auto">
+          <div
+            className="space-y-px rounded-xl overflow-hidden max-h-48 overflow-y-auto"
+            style={{ border: "1px solid var(--border)" }}
+          >
             {files.map((file, i) => (
               <div
                 key={i}
-                className="flex items-center gap-2.5 p-2 rounded-lg bg-gray-50 dark:bg-gray-800"
+                className="flex items-center gap-2.5 px-2.5 py-2"
+                style={{
+                  background: "var(--surface)",
+                  borderTop: i > 0 ? "1px solid var(--border)" : "none",
+                }}
               >
-                <FileThumb file={file} size={40} />
+                <FileThumb file={file} size={36} />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-700 dark:text-gray-300 truncate">
+                  <p className="text-[13px] truncate" style={{ color: "var(--fg-2)" }}>
                     {file.name}
                   </p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-[11px]" style={{ color: "var(--muted)" }}>
                     {(file.size / 1024).toFixed(0)} KB
                   </p>
                 </div>
@@ -91,8 +99,16 @@ export default function PdfCompress() {
         </div>
       )}
 
-      <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-xs text-amber-700 dark:text-amber-400">
-        ℹ️ 브라우저 기반 PDF 압축은 메타데이터 제거 및 구조 최적화를 수행합니다.
+      {/* 안내 메시지 */}
+      <div
+        className="p-3 rounded-lg text-[12px] leading-relaxed"
+        style={{
+          background: "rgba(217,119,6,0.07)",
+          border: "1px solid rgba(217,119,6,0.2)",
+          color: "#92400E",
+        }}
+      >
+        브라우저 기반 PDF 압축은 메타데이터 제거 및 구조 최적화를 수행합니다.
         이미지가 많은 PDF는 압축률이 낮을 수 있습니다.
       </div>
 
@@ -104,7 +120,10 @@ export default function PdfCompress() {
       )}
 
       {error && (
-        <p className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg whitespace-pre-line">
+        <p
+          className="text-[13px] p-3 rounded-lg whitespace-pre-line"
+          style={{ color: "var(--danger)", background: "var(--danger-bg)", border: "1px solid rgba(220,38,38,0.2)" }}
+        >
           {error}
         </p>
       )}
@@ -112,14 +131,20 @@ export default function PdfCompress() {
       <button
         onClick={handleCompress}
         disabled={files.length === 0 || loading}
-        className="w-full py-3 px-4 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="w-full py-[11px] px-4 rounded-xl text-[14px] font-medium text-white transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-90 active:scale-[0.99] cursor-pointer"
+        style={{
+          background: "var(--accent)",
+          boxShadow: "0 1px 3px rgba(37,99,235,0.25), inset 0 1px 0 rgba(255,255,255,0.1)",
+        }}
       >
         {loading ? "압축 중..." : "PDF 압축"}
       </button>
 
       {results.length > 0 && (
         <div className="space-y-3">
-          <h3 className="font-medium text-gray-800 dark:text-gray-200">압축 결과</h3>
+          <h3 className="text-[14px] font-semibold" style={{ color: "var(--fg)" }}>
+            압축 결과
+          </h3>
           {results.map((item, i) => (
             <ResultCard
               key={i}

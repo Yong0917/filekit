@@ -13,7 +13,7 @@ import { useState } from "react";
 
 const FORMAT_OPTIONS: { value: ImageFormat; label: string }[] = [
   { value: "jpeg", label: "JPG" },
-  { value: "png", label: "PNG" },
+  { value: "png",  label: "PNG" },
   { value: "webp", label: "WebP" },
 ];
 
@@ -75,6 +75,7 @@ export default function ImageConvert() {
   return (
     <div className="space-y-5">
       <ImageModal file={previewFile} onClose={() => setPreviewFile(null)} />
+
       <DropZone
         onFiles={addFiles}
         accept={{ "image/*": [] }}
@@ -83,42 +84,53 @@ export default function ImageConvert() {
         subLabel="JPG, PNG, WebP, GIF 등 모든 이미지 형식 지원 · 최대 100MB"
       />
 
-      {/* 파일 목록 + 썸네일 */}
+      {/* 파일 목록 */}
       {files.length > 0 && (
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-[12px]" style={{ color: "var(--muted)" }}>
               {files.length}개 파일 선택됨
             </p>
             <button
               onClick={clearFiles}
-              className="cursor-pointer text-xs text-red-500 hover:underline"
+              className="cursor-pointer text-[12px] hover:underline"
+              style={{ color: "var(--danger)" }}
               aria-label="파일 전체 제거"
             >
               전체 제거
             </button>
           </div>
-          <div className="space-y-1.5 max-h-48 overflow-y-auto">
+          <div
+            className="space-y-px rounded-xl overflow-hidden max-h-48 overflow-y-auto"
+            style={{ border: "1px solid var(--border)" }}
+          >
             {files.map((file, i) => (
               <div
                 key={i}
-                className="flex items-center gap-2.5 p-2 rounded-lg bg-gray-50 dark:bg-gray-800"
+                className="flex items-center gap-2.5 px-2.5 py-2"
+                style={{
+                  background: "var(--surface)",
+                  borderTop: i > 0 ? "1px solid var(--border)" : "none",
+                }}
               >
-                <FileThumb file={file} size={40} onClick={() => setPreviewFile(file)} />
+                <FileThumb file={file} size={36} onClick={() => setPreviewFile(file)} />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-700 dark:text-gray-300 truncate">
+                  <p className="text-[13px] truncate" style={{ color: "var(--fg-2)" }}>
                     {file.name}
                   </p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-[11px]" style={{ color: "var(--muted)" }}>
                     {(file.size / 1024).toFixed(0)} KB
                   </p>
                 </div>
                 <button
                   onClick={() => removeFile(i)}
-                  className="cursor-pointer p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded text-red-400 flex-shrink-0"
+                  className="cursor-pointer w-6 h-6 flex items-center justify-center rounded flex-shrink-0 transition-colors duration-100"
+                  style={{ color: "var(--muted)" }}
+                  onMouseEnter={e => { e.currentTarget.style.background = "var(--danger-bg)"; e.currentTarget.style.color = "var(--danger)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--muted)"; }}
                   aria-label={`${file.name} 제거`}
                 >
-                  ✕
+                  <svg width="9" height="9" viewBox="0 0 9 9" fill="none"><path d="M1 1l7 7M8 1L1 8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>
                 </button>
               </div>
             ))}
@@ -128,29 +140,34 @@ export default function ImageConvert() {
 
       {/* 출력 포맷 선택 */}
       <div className="space-y-2">
-        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label className="text-[13px]" style={{ color: "var(--fg-2)" }}>
           변환 포맷
         </label>
         <div className="flex gap-2" role="group" aria-label="변환 포맷 선택">
-          {FORMAT_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              onClick={() => setTargetFormat(opt.value)}
-              aria-pressed={targetFormat === opt.value}
-              aria-label={`${opt.label} 포맷으로 변환`}
-              className={`cursor-pointer flex-1 py-2 rounded-lg text-sm font-medium transition-colors border ${
-                targetFormat === opt.value
-                  ? "bg-blue-600 text-white border-blue-600"
-                  : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-blue-400"
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
+          {FORMAT_OPTIONS.map((opt) => {
+            const isActive = targetFormat === opt.value;
+            return (
+              <button
+                key={opt.value}
+                onClick={() => setTargetFormat(opt.value)}
+                aria-pressed={isActive}
+                aria-label={`${opt.label} 포맷으로 변환`}
+                className="cursor-pointer flex-1 py-2 rounded-lg text-[13px] font-medium transition-all duration-150 hover:brightness-95"
+                style={{
+                  background: isActive ? "var(--accent)" : "var(--surface-2)",
+                  color: isActive ? "white" : "var(--fg-2)",
+                  border: `1px solid ${isActive ? "var(--accent)" : "var(--border)"}`,
+                  boxShadow: isActive ? "0 1px 3px rgba(37,99,235,0.2)" : "var(--shadow-xs)",
+                }}
+              >
+                {opt.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* 품질 슬라이더 (PNG는 무손실이라 숨김) */}
+      {/* PNG는 무손실이라 품질 슬라이더 숨김 */}
       {targetFormat !== "png" && (
         <QualitySlider
           id="convert-quality"
@@ -169,7 +186,10 @@ export default function ImageConvert() {
       )}
 
       {error && (
-        <p className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg whitespace-pre-line">
+        <p
+          className="text-[13px] p-3 rounded-lg whitespace-pre-line"
+          style={{ color: "var(--danger)", background: "var(--danger-bg)", border: "1px solid rgba(220,38,38,0.2)" }}
+        >
           {error}
         </p>
       )}
@@ -177,7 +197,11 @@ export default function ImageConvert() {
       <button
         onClick={handleConvert}
         disabled={files.length === 0 || loading}
-        className="w-full py-3 px-4 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="w-full py-[11px] px-4 rounded-xl text-[14px] font-medium text-white transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-90 active:scale-[0.99] cursor-pointer"
+        style={{
+          background: "var(--accent)",
+          boxShadow: "0 1px 3px rgba(37,99,235,0.25), inset 0 1px 0 rgba(255,255,255,0.1)",
+        }}
       >
         {loading ? "변환 중..." : `${targetLabel}로 변환`}
       </button>
@@ -185,11 +209,14 @@ export default function ImageConvert() {
       {results.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="font-medium text-gray-800 dark:text-gray-200">변환 결과</h3>
+            <h3 className="text-[14px] font-semibold" style={{ color: "var(--fg)" }}>
+              변환 결과
+            </h3>
             {results.length > 1 && (
               <button
                 onClick={() => results.forEach((r) => handleDownload(r))}
-                className="cursor-pointer text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                className="cursor-pointer text-[12px] font-medium hover:underline"
+                style={{ color: "var(--accent)" }}
                 aria-label="변환 결과 전체 다운로드"
               >
                 전체 다운로드
