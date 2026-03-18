@@ -66,7 +66,7 @@ export default function PdfCompress() {
         accept={{ "application/pdf": [".pdf"] }}
         multiple
         label="PDF 파일을 업로드"
-        subLabel="각 페이지를 이미지로 재압축하여 용량 대폭 감소 · 최대 200MB"
+        subLabel="내부 이미지만 재압축 · 텍스트·벡터 보존 · 최대 200MB"
       />
 
       {/* 파일 목록 */}
@@ -151,8 +151,8 @@ export default function PdfCompress() {
           color: "#92400E",
         }}
       >
-        각 페이지를 이미지로 변환하여 압축합니다. 텍스트 선택·복사 기능은 제거되며,
-        이미지 위주의 PDF에서 가장 효과적입니다.
+        PDF 내부에 삽입된 JPEG 이미지만 재압축합니다. 텍스트 선택·복사 기능은 그대로 유지되며,
+        이미지가 많은 PDF에서 가장 효과적입니다.
       </div>
 
       {loading && (
@@ -163,13 +163,13 @@ export default function PdfCompress() {
               files.length > 1
                 ? `${currentIndex} / ${files.length} 파일 처리 중...`
                 : pageProgress
-                ? `페이지 ${pageProgress.page} / ${pageProgress.total} 처리 중...`
+                ? `이미지 ${pageProgress.page} / ${pageProgress.total} 재압축 중...`
                 : "처리 중..."
             }
           />
           {pageProgress && files.length <= 1 && (
             <p className="text-[11px] text-right" style={{ color: "var(--muted)" }}>
-              {pageProgress.page} / {pageProgress.total} 페이지
+              이미지 {pageProgress.page} / {pageProgress.total}
             </p>
           )}
         </div>
